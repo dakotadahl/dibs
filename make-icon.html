@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Generate Plugin Icon</title>
+<style>
+  body {
+    margin: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; min-height: 100vh;
+    background: #f0ece4; font-family: -apple-system, sans-serif; gap: 24px;
+  }
+  canvas { image-rendering: pixelated; border-radius: 22px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+  button {
+    padding: 12px 28px; background: #4A7C59; color: white;
+    border: none; border-radius: 8px; font-size: 15px; font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #2E5C3A; }
+  p { color: #7A5C4A; font-size: 13px; margin: 0; }
+</style>
+</head>
+<body>
+
+<canvas id="c" width="128" height="128" style="width:256px;height:256px"></canvas>
+<button onclick="download()">Download icon.png</button>
+<p>Save as <code>icon.png</code> in your plugin folder</p>
+
+<script>
+const canvas = document.getElementById("c");
+const ctx    = canvas.getContext("2d");
+
+const W = 128, H = 128;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function rr(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y,     x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x,     y + h, x,     y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x,     y,     x + r, y);
+  ctx.closePath();
+}
+
+// ── Background ────────────────────────────────────────────────────────────────
+
+ctx.fillStyle = "#3D2008";
+rr(0, 0, W, H, 22);
+ctx.fill();
+
+// ── Grid of soil cells ────────────────────────────────────────────────────────
+
+const COLS = 4, ROWS = 5;
+const PAD  = 12;
+const GAP  = 3;
+const cellW = (W - PAD * 2 - GAP * (COLS - 1)) / COLS;
+const cellH = (H - PAD * 2 - GAP * (ROWS - 1)) / ROWS;
+
+// Which cells get a plant (row, col) — 0-indexed
+const planted = {
+  "0,1": "#5C8A3C",
+  "0,2": "#5C8A3C",
+  "1,0": "#E05C2A",
+  "2,2": "#5C8A3C",
+  "2,3": "#9C4A9A",
+  "3,1": "#E05C2A",
+  "3,3": "#5C8A3C",
+  "4,0": "#5C8A3C",
+  "4,2": "#E8A020",
+};
+
+for (let row = 0; row < ROWS; row++) {
+  for (let col = 0; col < COLS; col++) {
+    const x = PAD + col * (cellW + GAP);
+    const y = PAD + row * (cellH + GAP);
+    const key = `${row},${col}`;
+
+    if (planted[key]) {
+      ctx.fillStyle = planted[key];
+    } else {
+      ctx.fillStyle = "#C4956A";
+    }
+    rr(x, y, cellW, cellH, 3);
+    ctx.fill();
+  }
+}
+
+// ── Leaf sprout on planted cells ──────────────────────────────────────────────
+
+function drawSprout(cx, cy, color) {
+  const s = Math.min(cellW, cellH) * 0.38;
+
+  // Stem
+  ctx.strokeStyle = "rgba(255,255,255,0.85)";
+  ctx.lineWidth = 1.5;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(cx, cy + s * 0.7);
+  ctx.lineTo(cx, cy - s * 0.5);
+  ctx.stroke();
+
+  // Left leaf
+  ctx.fillStyle = "rgba(255,255,255,0.85)";
+  ctx.beginPath();
+  ctx.ellipse(cx - s * 0.45, cy - s * 0.1, s * 0.42, s * 0.22, -0.6, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Right leaf
+  ctx.beginPath();
+  ctx.ellipse(cx + s * 0.45, cy - s * 0.3, s * 0.42, s * 0.22, 0.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+for (const [key] of Object.entries(planted)) {
+  const [row, col] = key.split(",").map(Number);
+  const cx = PAD + col * (cellW + GAP) + cellW / 2;
+  const cy = PAD + row * (cellH + GAP) + cellH / 2;
+  drawSprout(cx, cy);
+}
+
+// ── Subtle inner shadow / vignette ────────────────────────────────────────────
+
+const vignette = ctx.createRadialGradient(W/2, H/2, W*0.28, W/2, H/2, W*0.72);
+vignette.addColorStop(0, "rgba(0,0,0,0)");
+vignette.addColorStop(1, "rgba(0,0,0,0.22)");
+ctx.fillStyle = vignette;
+rr(0, 0, W, H, 22);
+ctx.fill();
+
+// ── Download ──────────────────────────────────────────────────────────────────
+
+function download() {
+  const a = document.createElement("a");
+  a.download = "icon.png";
+  a.href = canvas.toDataURL("image/png");
+  a.click();
+}
+</script>
+</body>
+</html>
