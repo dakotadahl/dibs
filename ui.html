@@ -276,7 +276,7 @@
 <!-- Header -->
 <div class="header">
   <span class="header-icon">🌱</span>
-  <h1>Garden Planner</h1>
+  <h1>Dibs</h1>
   <span class="header-sub">Square Foot Method</span>
 </div>
 
@@ -291,7 +291,7 @@
 
   <div class="field">
     <label>Bed Name</label>
-    <input type="text" id="bed-name" value="Garden Bed A" placeholder="e.g. Raised Bed A">
+    <input type="text" id="bed-name" value="Bed A" placeholder="e.g. Raised Bed A">
   </div>
 
   <div class="field">
@@ -308,7 +308,7 @@
     <div class="preview-meta" id="preview-meta"></div>
   </div>
 
-  <button class="btn btn-primary" id="create-btn">Create Garden Bed</button>
+  <button class="btn btn-primary" id="create-btn">Create Bed</button>
   <button class="btn btn-outline" id="export-btn">Export Plant List as CSV</button>
 
   <div class="tip">
@@ -367,7 +367,7 @@
 
 <!-- Cell info bar (shared across tabs, always visible when a cell is selected) -->
 <div class="cell-bar" id="cell-bar" style="display:none">
-  <div class="cell-bar-label">Selected Cell</div>
+  <div class="cell-bar-label" id="cell-bar-label">Selected Cell</div>
   <div id="cell-bar-content"></div>
 </div>
 
@@ -694,7 +694,12 @@ function updateCellBar() {
   }
 
   bar.style.display = "block";
-  const p = selectionState.plant;
+  const p     = selectionState.plant;
+  const count = selectionState.count || 1;
+  const multi = count > 1;
+
+  document.getElementById("cell-bar-label").textContent =
+    multi ? `Selected Cells (${count})` : "Selected Cell";
 
   if (!p) {
     body.innerHTML = `<div class="cell-empty">Empty — select a plant and click Assign</div>`;
@@ -707,7 +712,7 @@ function updateCellBar() {
           <div class="cell-plant-meta">${p.perSquare} per sq ft &middot; ${p.note}</div>
         </div>
       </div>
-      <button class="btn btn-ghost" id="clear-btn">Clear Cell</button>
+      <button class="btn btn-ghost" id="clear-btn">${multi ? `Clear ${count} Cells` : "Clear Cell"}</button>
     `;
     document.getElementById("clear-btn").addEventListener("click", () => {
       parent.postMessage({ pluginMessage: { type: "clear-plant" } }, "*");
@@ -746,7 +751,7 @@ window.addEventListener("message", (event) => {
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href     = url;
-    a.download = "garden-plant-list.csv";
+    a.download = "dibs-plant-list.csv";
     a.click();
     URL.revokeObjectURL(url);
   }

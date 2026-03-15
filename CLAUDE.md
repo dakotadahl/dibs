@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
-Garden Planner is a Figma/FigJam plugin for designing garden beds using the Square Foot Gardening (SFG) method. It runs in both Figma and FigJam editors.
+Dibs is a Figma plugin for designing garden beds using the Square Foot Gardening (SFG) method.
 
 ## Development Workflow
 

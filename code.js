@@ -1,10 +1,10 @@
-// Garden Planner — FigJam/Figma Plugin
+// Dibs — Figma Plugin
 // Each square foot cell is CELL_SIZE px wide/tall.
 
 const CELL_SIZE = 96;
 const GAP = 4;
 
-figma.showUI(__html__, { width: 340, height: 560, title: "Garden Planner" });
+figma.showUI(__html__, { width: 340, height: 560, title: "Dibs" });
 
 // Load saved custom plants and send to UI once it's ready
 figma.clientStorage.getAsync("customPlants").then((stored) => {
@@ -73,7 +73,7 @@ async function createGardenBed(widthFt, heightFt, bedName) {
 
   // Outer bed frame (visual container — double-click to enter, then single-click cells)
   const bed = figma.createFrame();
-  bed.name = bedName || `Garden Bed ${widthFt}×${heightFt}ft`;
+  bed.name = bedName || `Bed ${widthFt}×${heightFt}ft`;
   bed.resize(totalW, totalH);
   bed.fills = [{ type: "SOLID", color: hexToRgb("#3D2008") }];
   bed.cornerRadius = 8;
