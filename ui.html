@@ -254,6 +254,12 @@
   }
   .btn-sm { padding: 8px 10px; font-size: 12px; }
 
+  .btn-outline {
+    background: transparent; border: 1.5px solid var(--border);
+    color: var(--text-mid); margin-top: 6px; font-size: 12px;
+  }
+  .btn-outline:hover { background: var(--cream-dark); border-color: var(--soil-light); }
+
   /* Delete button on custom plant rows */
   .plant-delete {
     width: 22px; height: 22px; border-radius: 50%; border: none;
@@ -303,6 +309,7 @@
   </div>
 
   <button class="btn btn-primary" id="create-btn">Create Garden Bed</button>
+  <button class="btn btn-outline" id="export-btn">Export Plant List as CSV</button>
 
   <div class="tip">
     After placing the bed, <strong>double-click</strong> into it to select individual cells, then switch to <em>Plants</em> to assign crops.
@@ -317,7 +324,7 @@
   <div class="plant-list" id="plant-list"></div>
 
   <!-- Custom plant form -->
-  <div class="custom-section">
+  <div class="custom-section" id="custom-section">
     <button class="custom-toggle" id="custom-toggle">
       <span class="custom-toggle-icon" id="custom-toggle-icon">+</span>
       Add Custom Plant
@@ -671,6 +678,10 @@ document.getElementById("assign-btn").addEventListener("click", () => {
   parent.postMessage({ pluginMessage: { type: "assign-plant", plant: selectedPlant } }, "*");
 });
 
+document.getElementById("export-btn").addEventListener("click", () => {
+  parent.postMessage({ pluginMessage: { type: "export-csv" } }, "*");
+});
+
 // ─── Cell info bar ────────────────────────────────────────────────────────────
 
 function updateCellBar() {
@@ -724,6 +735,20 @@ window.addEventListener("message", (event) => {
     selectionState = msg;
     updateCellBar();
     updateAssignBtn();
+  }
+
+  if (msg.type === "csv-data") {
+    if (msg.count === 0) {
+      alert("No planted cells found on this page. Assign plants to bed cells first.");
+      return;
+    }
+    const blob = new Blob([msg.csv], { type: "text/csv" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href     = url;
+    a.download = "garden-plant-list.csv";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 });
 

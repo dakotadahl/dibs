@@ -39,6 +39,9 @@ figma.ui.onmessage = async (msg) => {
     case "resize":
       figma.ui.resize(340, Math.round(msg.height));
       break;
+    case "export-csv":
+      exportPlantCsv();
+      break;
   }
 };
 
@@ -185,6 +188,42 @@ async function clearSelectedCells() {
   }
 
   sendSelectionInfo();
+}
+
+// ─── Export plant list as CSV ─────────────────────────────────────────────────
+
+function exportPlantCsv() {
+  const beds = figma.currentPage.findAll(n => n.getPluginData("isGardenBed") === "true");
+
+  const tally = {}; // plant name → { plant, cells }
+  for (const bed of beds) {
+    for (const child of bed.children) {
+      if (child.getPluginData("isBedCell") !== "true") continue;
+      const plant = JSON.parse(child.getPluginData("plant") || "{}");
+      if (!plant.name) continue;
+      if (!tally[plant.name]) tally[plant.name] = { plant, cells: 0 };
+      tally[plant.name].cells++;
+    }
+  }
+
+  const rows = [["Plant", "Emoji", "Category", "Cells", "Per Sq Ft", "Total Plants", "Notes"]];
+  for (const { plant, cells } of Object.values(tally)) {
+    rows.push([
+      plant.name,
+      plant.emoji  || "",
+      plant.category || "",
+      cells,
+      plant.perSquare || 1,
+      cells * (plant.perSquare || 1),
+      plant.note || "",
+    ]);
+  }
+
+  const csv = rows
+    .map(row => row.map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
+
+  figma.ui.postMessage({ type: "csv-data", csv, count: Object.keys(tally).length });
 }
 
 // ─── Util ─────────────────────────────────────────────────────────────────────
