@@ -8,13 +8,6 @@ Plan raised beds, assign plants from a curated library, and export a CSV plant l
 
 ## Install
 
-### From the Figma Community (recommended)
-
-1. Open Figma
-2. Go to **Plugins** → **Browse plugins in Community**
-3. Search for **Dibs**
-4. Click **Install**
-
 ### From source (development)
 
 1. Clone this repo
